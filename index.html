@@ -40,7 +40,7 @@
             overflow: hidden;
         }
 
-        /* --- СТАТИЧНЫЙ КРАСИВЫЙ ФОН (БЕЗ АНИМАЦИЙ) --- */
+        /* --- ФОН (БЕЗ АНИМАЦИЙ) --- */
         .bg-animation {
             position: fixed;
             top: 0;
@@ -49,14 +49,12 @@
             height: 100vh;
             z-index: -1;
             overflow: hidden;
-            /* Основной градиент */
             background: radial-gradient(circle at 20% 20%, rgba(100, 100, 255, 0.2) 0%, transparent 50%),
                         radial-gradient(circle at 80% 80%, rgba(255, 100, 200, 0.15) 0%, transparent 50%),
                         radial-gradient(circle at 50% 50%, rgba(100, 200, 255, 0.1) 0%, transparent 60%),
                         #030303;
         }
 
-        /* Легкая сетка для текстуры */
         .bg-grid {
             position: absolute;
             top: 0; left: 0; width: 100%; height: 100%;
@@ -80,15 +78,20 @@
             justify-content: center;
         }
 
-        /* Аватар (БЕЗ АНИМАЦИЙ) */
+        /* Аватар */
         .avatar-wrapper {
             position: relative;
             width: 130px;
             height: 130px;
             margin-bottom: 15px;
+            cursor: pointer;
+            transition: transform 0.2s ease;
         }
 
-        /* Кольцо вокруг аватара (статичное) */
+        .avatar-wrapper:active {
+            transform: scale(0.97);
+        }
+
         .avatar-ring-outer {
             position: absolute;
             top: -12px;
@@ -310,9 +313,73 @@
             fill: #a0a0ff;
         }
 
+        /* --- МОДАЛЬНОЕ ОКНО ДЛЯ ФОТО --- */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(0, 0, 0, 0.95);
+            z-index: 9999;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            backdrop-filter: blur(10px);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .modal.active {
+            display: flex;
+            opacity: 1;
+        }
+
+        .modal img {
+            max-width: 90vw;
+            max-height: 90vh;
+            border-radius: 16px;
+            object-fit: contain;
+            box-shadow: 0 0 50px rgba(160, 160, 255, 0.3);
+            transform: scale(0.9);
+            transition: transform 0.3s ease;
+        }
+
+        .modal.active img {
+            transform: scale(1);
+        }
+
+        /* Крестик */
+        .modal-close {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: #ffffff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+            font-size: 28px;
+            line-height: 1;
+            z-index: 10000;
+        }
+
+        .modal-close:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: rotate(90deg);
+            box-shadow: 0 0 20px rgba(160, 160, 255, 0.5);
+        }
+
         /* --- ОСОБЕННОСТИ ДЛЯ ТЕЛЕФОНА --- */
         @media (max-width: 768px) {
-            /* Другой фон на телефоне (статичный, но более насыщенный) */
             .bg-animation {
                 background: radial-gradient(circle at 20% 20%, rgba(80, 80, 220, 0.25) 0%, transparent 50%),
                             radial-gradient(circle at 80% 80%, rgba(220, 80, 180, 0.2) 0%, transparent 50%),
@@ -330,6 +397,8 @@
             .location { font-size: 12px; }
             .status-text { font-size: 12px; }
             .footer { margin-top: 30px; font-size: 11px; }
+            .modal-close { width: 44px; height: 44px; font-size: 24px; top: 15px; right: 15px; }
+            .modal img { max-width: 95vw; max-height: 85vh; }
         }
     </style>
 </head>
@@ -341,8 +410,8 @@
     </div>
 
     <div class="container">
-        <!-- Аватар -->
-        <div class="avatar-wrapper">
+        <!-- Аватар (кликабельный) -->
+        <div class="avatar-wrapper" onclick="openModal()">
             <div class="avatar-ring-outer"></div>
             <div class="avatar-ring-inner"></div>
             <div class="avatar">
@@ -405,7 +474,36 @@
         Страница разработана мною в 2026 году
     </div>
 
+    <!-- МОДАЛЬНОЕ ОКНО -->
+    <div class="modal" id="photoModal" onclick="closeModal(event)">
+        <div class="modal-close" onclick="closeModal(event)">✕</div>
+        <img src="foto.jpg" alt="Aleksej" onclick="event.stopPropagation()">
+    </div>
+
     <script>
+        // Открытие модального окна
+        function openModal() {
+            const modal = document.getElementById('photoModal');
+            modal.classList.add('active');
+            document.body.style.overflow = 'hidden'; // Блокируем скролл
+        }
+
+        // Закрытие модального окна
+        function closeModal(event) {
+            if (event) event.stopPropagation();
+            const modal = document.getElementById('photoModal');
+            modal.classList.remove('active');
+            document.body.style.overflow = ''; // Возвращаем скролл
+        }
+
+        // Закрытие по клавише Esc
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                closeModal();
+            }
+        });
+
+        // Счётчик просмотров
         document.addEventListener("DOMContentLoaded", function() {
             const hasVisited = localStorage.getItem('albanoVisited');
             let currentViews = 60;
